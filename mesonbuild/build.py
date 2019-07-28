@@ -438,6 +438,7 @@ class BuildTarget(Target):
         self.compilers = OrderedDict() # type: OrderedDict[str, Compiler]
         self.objects = []
         self.external_deps = []
+        self.external_deps_link = []
         self.include_dirs = []
         self.link_language = kwargs.get('link_language')
         self.link_targets = []
@@ -1048,8 +1049,16 @@ You probably should put it in link_with instead.''')
                                        'dependency()) or an internal dependency (returned by '
                                        'declare_dependency()).'.format(type(dep).__name__))
 
-    def get_external_deps(self):
-        return self.external_deps
+    def add_external_link_deps(self, deps):
+        for dep in deps:
+            if dep not in self.external_deps_link:
+                self.external_deps_link.append(dep)
+
+    def get_external_deps(self, with_link=False):
+        deps = self.external_deps
+        if with_link:
+            deps += self.external_deps_link
+        return deps
 
     def link(self, target):
         for t in listify(target, unholder=True):

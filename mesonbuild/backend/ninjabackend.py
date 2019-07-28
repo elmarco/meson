@@ -21,6 +21,7 @@ from collections import OrderedDict
 import itertools
 from pathlib import PurePath, Path
 from functools import lru_cache
+from copy import deepcopy
 
 from . import backends
 from .. import modules
@@ -2117,6 +2118,10 @@ https://gcc.gnu.org/bugzilla/show_bug.cgi?id=47485'''))
         if isinstance(src, str) and src.endswith('.h'):
             raise AssertionError('BUG: sources should not contain headers {!r}'.format(src))
 
+        if isinstance(src, File):
+            target.add_external_link_deps(src.deps)
+            target = deepcopy(target)
+            target.add_deps(src.deps)
         compiler = get_compiler_for_source(target.compilers.values(), src)
         commands = self._generate_single_compile(target, compiler, is_generated)
         commands = CompilerArgs(commands.compiler, commands)
@@ -2520,7 +2525,7 @@ https://gcc.gnu.org/bugzilla/show_bug.cgi?id=47485'''))
 
             commands += target.link_args
             # External deps must be last because target link libraries may depend on them.
-            for dep in target.get_external_deps():
+            for dep in target.get_external_deps(True):
                 # Extend without reordering or de-dup to preserve `-L -l` sets
                 # https://github.com/mesonbuild/meson/issues/1718
                 commands.extend_preserving_lflags(dep.get_link_args())

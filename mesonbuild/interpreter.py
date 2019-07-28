@@ -2012,6 +2012,7 @@ permitted_kwargs = {'add_global_arguments': {'language', 'native'},
                                            'version',
                                            },
                     'executable': build.known_exe_kwargs,
+                    'files': {'dependencies'},
                     'find_program': {'required', 'native', 'version'},
                     'generator': {'arguments',
                                   'output',
@@ -2279,10 +2280,12 @@ class Interpreter(InterpreterBase):
             self.modules[modname] = module.initialize(self)
         return ModuleHolder(modname, self.modules[modname], self)
 
+    @FeatureNewKwargs('declare_dependency', '0.52.0', ['dependencies'])
+    @permittedKwargs(permitted_kwargs['files'])
     @stringArgs
-    @noKwargs
     def func_files(self, node, args, kwargs):
-        return [mesonlib.File.from_source_file(self.environment.source_dir, self.subdir, fname) for fname in args]
+        deps = extract_as_list(kwargs, 'dependencies', unholder=True)
+        return [mesonlib.File.from_source_file(self.environment.source_dir, self.subdir, fname, deps) for fname in args]
 
     @FeatureNewKwargs('declare_dependency', '0.46.0', ['link_whole'])
     @permittedKwargs(permitted_kwargs['declare_dependency'])

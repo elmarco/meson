@@ -209,10 +209,11 @@ class FileMode:
         return perms
 
 class File:
-    def __init__(self, is_built: bool, subdir: str, fname: str):
+    def __init__(self, is_built: bool, subdir: str, fname: str, deps=[]):
         self.is_built = is_built
         self.subdir = subdir
         self.fname = fname
+        self.deps = deps
         assert(isinstance(self.subdir, str))
         assert(isinstance(self.fname, str))
 
@@ -227,11 +228,10 @@ class File:
         return ret.format(self.relative_name())
 
     @staticmethod
-    @lru_cache(maxsize=None)
-    def from_source_file(source_root: str, subdir: str, fname: str):
+    def from_source_file(source_root: str, subdir: str, fname: str, deps=[]):
         if not os.path.isfile(os.path.join(source_root, subdir, fname)):
             raise MesonException('File %s does not exist.' % fname)
-        return File(False, subdir, fname)
+        return File(False, subdir, fname, deps)
 
     @staticmethod
     def from_built_file(subdir: str, fname: str):
