@@ -3394,6 +3394,12 @@ This will become a hard error in the future.''' % kwargs['input'], location=self
         envlist = kwargs.get('env', EnvironmentVariablesHolder())
         if isinstance(envlist, EnvironmentVariablesHolder):
             env = envlist.held_object
+        elif isinstance(envlist, dict):
+            FeatureNew('environment dictionary', '0.52.0').use(self.subproject)
+            env = EnvironmentVariablesHolder()
+            for k, v in envlist.items():
+                env.set_method([k, v], {})
+            env = env.held_object
         else:
             envlist = listify(envlist)
             # Convert from array to environment object
@@ -3972,9 +3978,21 @@ different subdirectory.
             argsdict[lang] = argsdict.get(lang, []) + args
 
     @noKwargs
-    @noPosargs
     def func_environment(self, node, args, kwargs):
-        return EnvironmentVariablesHolder()
+        if args:
+            FeatureNew('environment positional arguments', '0.52.0').use(self.subproject)
+        if len(args) > 1:
+            raise InterpreterException('environment takes only one optional positional arguments')
+        elif len(args) == 1:
+            initial_values = args[0]
+            if not isinstance(initial_values, dict):
+                raise InterpreterException('environment first argument must be a dictionary')
+        else:
+            initial_values = {}
+        env = EnvironmentVariablesHolder()
+        for k, v in initial_values.items():
+            env.set_method([k, v], {})
+        return env
 
     @stringArgs
     @noKwargs

@@ -491,11 +491,15 @@ Print the argument string and halts the build process.
 ### environment()
 
 ``` meson
-    environment_object environment()
+    environment_object environment(...)
 ```
 
 Returns an empty [environment variable
 object](#environment-object). Added in 0.35.0.
+
+Since *0.52.0* takes an optional dictionary as first argument. If
+provided, each key/value pair is added into the `environment_object`
+as if `set()` method was called for each of them.
 
 ### executable()
 
