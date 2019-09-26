@@ -1723,8 +1723,9 @@ class ExternalProgram:
 
         if not silent:
             if self.found():
-                mlog.log('Program', mlog.bold(name), 'found:', mlog.green('YES'),
-                         '(%s)' % ' '.join(self.command))
+                if not self.path.startswith(search_dir):
+                    mlog.log('Program', mlog.bold(name), 'found:', mlog.green('YES'),
+                             '(%s)' % ' '.join(self.command))
             else:
                 mlog.log('Program', mlog.bold(name), 'found:', mlog.red('NO'))
 
